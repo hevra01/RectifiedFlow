@@ -59,10 +59,14 @@ class RectifiedFlow():
         return to_flattened_numpy(drift)
 
       # Black-box ODE solver for the probability flow ODE
+      # IVP refers to initial value problem.
       if reverse:
         solution = integrate.solve_ivp(ode_func, (self.T, eps), to_flattened_numpy(x),
                                                      rtol=rtol, atol=atol, method=method)
       else:
+        # so here, we basically call the ode_func, which returns the drift vector to
+        # move the data to the target distribution. we start from eps (starting time), 
+        # which is close to zero, to 1, which is the ending time.
         solution = integrate.solve_ivp(ode_func, (eps, self.T), to_flattened_numpy(x),
                                      rtol=rtol, atol=atol, method=method)
       x = torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32)

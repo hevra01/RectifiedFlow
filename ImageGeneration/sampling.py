@@ -127,15 +127,41 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
       model_fn = mutils.get_model_fn(model, train=False)
 
       def ode_func(t, x):
+        """
+        The ode_func computes the drift vector for the current state x at time t.
+
+        This function is called repeatedly by the ODE solver to determine how the system
+        should evolve over time. It converts the state x from a flattened array into a 
+        tensor, computes the drift using the model, and then flattens the drift back 
+        into a 1D array for the solver.
+
+        Args:
+          t: Current time step.
+          x: Current state of the system as a flattened numpy array.
+
+        Returns:
+          The drift vector as a flattened numpy array, which will be used to update the
+          state in the next step.
+        """
+
         x = from_flattened_numpy(x, shape).to(device).type(torch.float32)
         vec_t = torch.ones(shape[0], device=x.device) * t
         drift = model_fn(x, vec_t*999)
 
         return to_flattened_numpy(drift)
 
-      # Black-box ODE solver for the probability flow ODE
+      # Black-box ODE solver for the probability flow ODE => solve initial value problems (IVPs)
       solution = integrate.solve_ivp(ode_func, (eps, sde.T), to_flattened_numpy(x),
                                      rtol=rtol, atol=atol, method=method)
+      
+      """
+      nfev stands for "number of function evaluations." 
+      This refers to how many times the function ode_func has 
+      been called during the integration process. Each time the 
+      solver evaluates the derivative (or drift in your context) 
+      at a different point in time or space, it counts as one 
+      function evaluation.
+      """
       nfe = solution.nfev
       x = torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32)
 
