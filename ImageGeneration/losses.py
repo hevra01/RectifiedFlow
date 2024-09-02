@@ -100,7 +100,6 @@ def get_rectified_flow_loss_fn(sde, train, reduce_mean=True, eps=1e-3):
         ### standard rectified flow loss
         t = torch.rand(batch.shape[0], device=batch.device) * (sde.T - eps) + eps
 
-    print("t: and shape: batch.shape", t, t.shape, batch.shape)
     
     # Essentially, t_expand is a tensor where each element of t has been "expanded" into 
     # a 3D tensor of the same shape as the images in the batch, so the random time step t 

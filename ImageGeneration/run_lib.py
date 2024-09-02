@@ -187,6 +187,7 @@ def evaluate(config,
     eval_folder: The subfolder for storing evaluation results. Default to
       "eval".
   """
+
   # Create directory to eval_folder
   eval_dir = os.path.join(workdir, eval_folder)
   tf.io.gfile.makedirs(eval_dir)
@@ -226,6 +227,7 @@ def evaluate(config,
 
   # Create the one-step evaluation function when loss computation is enabled
   if config.eval.enable_loss:
+
     optimize_fn = losses.optimization_manager(config)
     continuous = config.training.continuous
     likelihood_weighting = config.training.likelihood_weighting
@@ -252,6 +254,7 @@ def evaluate(config,
 
   # Build the likelihood computation function when likelihood is enabled
   if config.eval.enable_bpd:
+    
     if config.training.sde.lower() == 'mixup':
       likelihood_fn = likelihood.get_likelihood_fn_rf(sde, inverse_scaler)
     else:
@@ -270,6 +273,7 @@ def evaluate(config,
 
   begin_ckpt = config.eval.begin_ckpt
   logging.info("begin checkpoint: %d" % (begin_ckpt,))
+
   for ckpt in range(begin_ckpt, config.eval.end_ckpt + 1):
     # Wait if the target checkpoint doesn't exist yet
     waiting_message_printed = False
@@ -339,6 +343,7 @@ def evaluate(config,
     # Generate samples and compute IS/FID/KID when enabled
     if config.eval.enable_sampling:
       num_sampling_rounds = config.eval.num_samples // config.eval.batch_size + 1
+      
       for r in range(num_sampling_rounds):
         logging.info("sampling -- ckpt: %d, round: %d" % (ckpt, r))
 
@@ -371,48 +376,50 @@ def evaluate(config,
             io_buffer, pool_3=latents["pool_3"], logits=latents["logits"])
           fout.write(io_buffer.getvalue())
 
-      # Compute inception scores, FIDs and KIDs.
-      # Load all statistics that have been previously computed and saved for each host
-      all_logits = []
-      all_pools = []
-      this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
-      stats = tf.io.gfile.glob(os.path.join(this_sample_dir, "statistics_*.npz"))
-      for stat_file in stats:
-        with tf.io.gfile.GFile(stat_file, "rb") as fin:
-          stat = np.load(fin)
-          if not inceptionv3:
-            all_logits.append(stat["logits"])
-          all_pools.append(stat["pool_3"])
+      # Compute inception scores, FIDs, and KIDs only if the flag is set
+      if config.eval.compute_metrics:
+        # Compute inception scores, FIDs and KIDs.
+        # Load all statistics that have been previously computed and saved for each host
+        all_logits = []
+        all_pools = []
+        this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
+        stats = tf.io.gfile.glob(os.path.join(this_sample_dir, "statistics_*.npz"))
+        for stat_file in stats:
+          with tf.io.gfile.GFile(stat_file, "rb") as fin:
+            stat = np.load(fin)
+            if not inceptionv3:
+              all_logits.append(stat["logits"])
+            all_pools.append(stat["pool_3"])
 
-      if not inceptionv3:
-        all_logits = np.concatenate(all_logits, axis=0)[:config.eval.num_samples]
-      all_pools = np.concatenate(all_pools, axis=0)[:config.eval.num_samples]
+        if not inceptionv3:
+          all_logits = np.concatenate(all_logits, axis=0)[:config.eval.num_samples]
+        all_pools = np.concatenate(all_pools, axis=0)[:config.eval.num_samples]
 
-      # Load pre-computed dataset statistics.
-      data_stats = evaluation.load_dataset_stats(config)
-      data_pools = data_stats["pool_3"]
+        # Load pre-computed dataset statistics.
+        data_stats = evaluation.load_dataset_stats(config)
+        data_pools = data_stats["pool_3"]
 
-      # Compute FID/KID/IS on all samples together.
-      if not inceptionv3:
-        inception_score = tfgan.eval.classifier_score_from_logits(all_logits)
-      else:
-        inception_score = -1
+        # Compute FID/KID/IS on all samples together.
+        if not inceptionv3:
+          inception_score = tfgan.eval.classifier_score_from_logits(all_logits)
+        else:
+          inception_score = -1
 
-      fid = tfgan.eval.frechet_classifier_distance_from_activations(
-        data_pools, all_pools)
-      # Hack to get tfgan KID work for eager execution.
-      tf_data_pools = tf.convert_to_tensor(data_pools)
-      tf_all_pools = tf.convert_to_tensor(all_pools)
-      kid = tfgan.eval.kernel_classifier_distance_from_activations(
-        tf_data_pools, tf_all_pools).numpy()
-      del tf_data_pools, tf_all_pools
+        fid = tfgan.eval.frechet_classifier_distance_from_activations(
+          data_pools, all_pools)
+        # Hack to get tfgan KID work for eager execution.
+        tf_data_pools = tf.convert_to_tensor(data_pools)
+        tf_all_pools = tf.convert_to_tensor(all_pools)
+        kid = tfgan.eval.kernel_classifier_distance_from_activations(
+          tf_data_pools, tf_all_pools).numpy()
+        del tf_data_pools, tf_all_pools
 
-      logging.info(
-        "ckpt-%d --- inception_score: %.6e, FID: %.6e, KID: %.6e" % (
-          ckpt, inception_score, fid, kid))
+        logging.info(
+          "ckpt-%d --- inception_score: %.6e, FID: %.6e, KID: %.6e" % (
+            ckpt, inception_score, fid, kid))
 
-      with tf.io.gfile.GFile(os.path.join(eval_dir, f"report_{ckpt}.npz"),
-                             "wb") as f:
-        io_buffer = io.BytesIO()
-        np.savez_compressed(io_buffer, IS=inception_score, fid=fid, kid=kid)
-        f.write(io_buffer.getvalue())
+        with tf.io.gfile.GFile(os.path.join(eval_dir, f"report_{ckpt}.npz"),
+                              "wb") as f:
+          io_buffer = io.BytesIO()
+          np.savez_compressed(io_buffer, IS=inception_score, fid=fid, kid=kid)
+          f.write(io_buffer.getvalue())
