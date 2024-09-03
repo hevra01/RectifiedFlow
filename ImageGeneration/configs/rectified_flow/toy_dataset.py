@@ -1,0 +1,54 @@
+"""Training Rectified Flow on Swissroll with DDPM++."""
+
+from configs.default_toy_dataset import get_default_configs
+
+
+def get_config():
+  config = get_default_configs()
+  # training
+  training = config.training
+  training.sde = 'rectified_flow'
+  training.continuous = False
+  training.snapshot_freq = 100000
+  training.reduce_mean = True
+
+  # sampling
+  sampling = config.sampling
+  sampling.method = 'rectified_flow'
+  sampling.init_type = 'gaussian' 
+  sampling.init_noise_scale = 1.0
+  sampling.use_ode_sampler = 'rk45' ### rk45 or euler
+  sampling.ode_tol = 1e-5
+
+  # data
+  data = config.data
+  data.centered = True
+
+  # model
+  model = config.model
+  model.name = 'ncsnpp'
+  model.scale_by_sigma = False
+  model.ema_rate = 0.999999
+  model.dropout = 0.15
+  model.normalization = 'GroupNorm'
+  model.nonlinearity = 'swish'
+  model.nf = 128
+  model.ch_mult = (1, 2, 2, 2)
+  model.num_res_blocks = 4
+  model.attn_resolutions = (16,)
+  model.resamp_with_conv = True
+  model.conditional = True
+  model.fir = False
+  model.fir_kernel = [1, 3, 3, 1]
+  model.skip_rescale = True
+  model.resblock_type = 'biggan'
+  model.progressive = 'none'
+  model.progressive_input = 'none'
+  model.progressive_combine = 'sum'
+  model.attention_type = 'ddpm'
+  model.init_scale = 0.
+  model.embedding_type = 'positional'
+  model.fourier_scale = 16
+  model.conv_size = 3
+
+  return config
