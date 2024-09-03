@@ -9,7 +9,7 @@ def get_config():
   training = config.training
   training.sde = 'rectified_flow'
   training.continuous = False
-  training.snapshot_freq = 100000
+  training.snapshot_freq = 50
   training.reduce_mean = True
 
   # sampling
@@ -26,29 +26,20 @@ def get_config():
 
   # model
   model = config.model
-  model.name = 'ncsnpp'
+  model.input_dim = 4 # 2D + 2D because the time embedding is 2D and the input is 2D
+  model.output_dim = 2
+  model.hidden_dim = 128
+  model.name = 'Simple2DNetwork'
   model.scale_by_sigma = False
   model.ema_rate = 0.999999
   model.dropout = 0.15
   model.normalization = 'GroupNorm'
   model.nonlinearity = 'swish'
-  model.nf = 128
-  model.ch_mult = (1, 2, 2, 2)
-  model.num_res_blocks = 4
-  model.attn_resolutions = (16,)
-  model.resamp_with_conv = True
   model.conditional = True
   model.fir = False
-  model.fir_kernel = [1, 3, 3, 1]
-  model.skip_rescale = True
   model.resblock_type = 'biggan'
   model.progressive = 'none'
   model.progressive_input = 'none'
   model.progressive_combine = 'sum'
-  model.attention_type = 'ddpm'
-  model.init_scale = 0.
-  model.embedding_type = 'positional'
-  model.fourier_scale = 16
-  model.conv_size = 3
 
   return config

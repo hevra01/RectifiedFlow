@@ -18,6 +18,7 @@
 
 import gc
 import io
+import itertools
 import os
 import time
 
@@ -81,8 +82,10 @@ def train(config, workdir):
   train_ds, eval_ds, _ = datasets.get_dataset(config,
                                               uniform_dequantization=config.data.uniform_dequantization)
   
-  train_iter = iter(train_ds)  # pytype: disable=wrong-arg-types
-  eval_iter = iter(eval_ds)  # pytype: disable=wrong-arg-types
+  # Wrap the iterator with itertools.cycle to make it infinite
+  train_iter = itertools.cycle(iter(train_ds))  
+  eval_iter = itertools.cycle(iter(eval_ds))
+
   # Create data normalizer and its inverse
   scaler = datasets.get_data_scaler(config)
   inverse_scaler = datasets.get_data_inverse_scaler(config)
@@ -127,10 +130,9 @@ def train(config, workdir):
   logging.info("Starting training loop at step %d." % (initial_step,))
 
   for step in range(initial_step, num_train_steps + 1):
-    # Convert data to JAX arrays and normalize them. Use ._numpy() to avoid copy.
     batch = next(train_iter).to(config.device).float()
-    batch = batch.permute(0, 3, 1, 2)
-    batch = scaler(batch)
+   
+    #batch = scaler(batch)
     # Execute one training step
     loss = train_step_fn(state, batch)
     if step % config.training.log_freq == 0:
@@ -144,8 +146,7 @@ def train(config, workdir):
     # Report the loss on an evaluation dataset periodically
     if step % config.training.eval_freq == 0:
       eval_batch = next(eval_iter).to(config.device).float()
-      eval_batch = eval_batch.permute(0, 3, 1, 2)
-      eval_batch = scaler(eval_batch)
+      #eval_batch = scaler(eval_batch)
       eval_loss = eval_step_fn(state, eval_batch)
       logging.info("step: %d, eval_loss: %.5e" % (step, eval_loss.item()))
       writer.add_scalar("eval_loss", eval_loss.item(), step)

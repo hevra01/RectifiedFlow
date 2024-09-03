@@ -17,8 +17,8 @@
 """
 
 import torch
-import sde_lib
 import numpy as np
+import sde_lib
 
 
 _MODELS = {}
@@ -44,7 +44,6 @@ def register_model(cls=None, *, name=None):
 
 
 def get_model(name):
-  #print(_MODELS)
   return _MODELS[name]
 
 

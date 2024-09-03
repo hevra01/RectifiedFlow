@@ -6,13 +6,13 @@ def get_default_configs():
   config = ml_collections.ConfigDict()
   # training
   config.training = training = ml_collections.ConfigDict()
-  config.training.batch_size = 128
-  training.n_iters = 1300001
-  training.snapshot_freq = 50000
+  config.training.batch_size = 10
+  training.n_iters = 100
+  training.snapshot_freq = 50
   training.log_freq = 50
-  training.eval_freq = 100
+  training.eval_freq = 50
   ## store additional checkpoints for preemption in cloud computing environments
-  training.snapshot_freq_for_preemption = 10000
+  training.snapshot_freq_for_preemption = 50
   ## produce samples at each snapshot.
   training.snapshot_sampling = True
   training.likelihood_weighting = False
@@ -30,16 +30,16 @@ def get_default_configs():
   sampling.init_noise_scale = 1.0
   sampling.use_ode_sampler = 'rk45'
   sampling.ode_tol = 1e-5
-  sampling.sample_N = 1000
+  sampling.sample_N = 100
 
   # evaluation
   config.eval = evaluate = ml_collections.ConfigDict()
   evaluate.compute_metrics = False
   evaluate.begin_ckpt = 2
   evaluate.end_ckpt = 3
-  evaluate.batch_size = 1024
+  evaluate.batch_size = 10
   evaluate.enable_sampling = True
-  evaluate.num_samples = 50000
+  evaluate.num_samples = 100
   evaluate.enable_loss = False
   evaluate.enable_bpd = False
   evaluate.bpd_dataset = 'test'
@@ -48,10 +48,10 @@ def get_default_configs():
   config.data = data = ml_collections.ConfigDict()
   data.dataset = 'Swissroll'
   data.image_size = 32
-  data.random_flip = True
+  data.random_flip = False
   data.centered = False
   data.uniform_dequantization = False
-  data.num_channels = 3
+  data.num_channels = 2
 
   # model
   config.model = model = ml_collections.ConfigDict()

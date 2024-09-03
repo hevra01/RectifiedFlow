@@ -102,9 +102,9 @@ def get_rectified_flow_loss_fn(sde, train, reduce_mean=True, eps=1e-3):
 
     
     # Essentially, t_expand is a tensor where each element of t has been "expanded" into 
-    # a 3D tensor of the same shape as the images in the batch, so the random time step t 
+    # a 2D tensor of the same shape as the images in the batch, so the random time step t 
     # is now applied uniformly across all pixels and channels for each image.
-    t_expand = t.view(-1, 1, 1, 1).repeat(1, batch.shape[1], batch.shape[2], batch.shape[3])
+    t_expand = t.view(-1, 1).repeat(1, batch.shape[1])
 
     # This line performs a linear interpolation between the original image (batch) and the noise (z0).
     
