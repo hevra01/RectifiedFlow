@@ -111,10 +111,6 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
       img = tf.image.convert_image_dtype(img, tf.float32)
       return tf.image.resize(img, [config.data.image_size, config.data.image_size], antialias=True)
 
-  elif config.data.dataset == 'Swissroll':
-    dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
-    return dataset[:50], dataset[50:], None
-
   elif config.data.dataset == 'SVHN':
     dataset_builder = tfds.builder('svhn_cropped')
     train_split_name = 'train'
