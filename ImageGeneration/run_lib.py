@@ -80,7 +80,7 @@ def train(config, workdir):
   # Build data iterators
   train_ds, eval_ds, _ = datasets.get_dataset(config,
                                               uniform_dequantization=config.data.uniform_dequantization)
-
+  print(len(list(train_ds)), len(list(eval_ds)))
   train_iter = iter(train_ds)  # pytype: disable=wrong-arg-types
   eval_iter = iter(eval_ds)  # pytype: disable=wrong-arg-types
   # Create data normalizer and its inverse
@@ -128,7 +128,8 @@ def train(config, workdir):
 
   for step in range(initial_step, num_train_steps + 1):
     # Convert data to JAX arrays and normalize them. Use ._numpy() to avoid copy.
-    batch = torch.from_numpy(next(train_iter)['image']._numpy()).to(config.device).float()
+    print(next(train_iter))
+    batch = next(train_iter).to(config.device).float()
     batch = batch.permute(0, 3, 1, 2)
     batch = scaler(batch)
     # Execute one training step

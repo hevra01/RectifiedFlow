@@ -19,6 +19,8 @@ import jax
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import os
+import numpy as np
+from custom_datasets import Swissroll
 
 def get_data_scaler(config):
   """Data normalizer. Assume data are always in [0, 1]."""
@@ -108,6 +110,10 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
     def resize_op(img):
       img = tf.image.convert_image_dtype(img, tf.float32)
       return tf.image.resize(img, [config.data.image_size, config.data.image_size], antialias=True)
+
+  elif config.data.dataset == 'Swissroll':
+    dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
+    return dataset[:50], dataset[50:], None
 
   elif config.data.dataset == 'SVHN':
     dataset_builder = tfds.builder('svhn_cropped')

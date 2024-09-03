@@ -35,6 +35,7 @@ flags.DEFINE_string("eval_folder", "eval",
                     "The folder name for storing evaluation results")
 flags.mark_flags_as_required(["workdir", "config", "mode"])
 
+  
 
 def main(argv):
   if FLAGS.mode == "train":
