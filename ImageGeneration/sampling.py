@@ -121,6 +121,7 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
       if z is None:
         z0 = sde.get_z0(torch.zeros(shape, device=device), train=False).to(device)
         x = z0.detach().clone()
+        print("initial noise: , coming here for sampling")
       else:
         x = z
       

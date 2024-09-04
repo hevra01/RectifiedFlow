@@ -7,7 +7,7 @@ def get_default_configs():
   # training
   config.training = training = ml_collections.ConfigDict()
   config.training.batch_size = 10
-  training.n_iters = 100
+  training.n_iters = 1000
   training.snapshot_freq = 50
   training.log_freq = 50
   training.eval_freq = 50
@@ -75,5 +75,5 @@ def get_default_configs():
 
   config.seed = 42
   config.device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-
+ 
   return config

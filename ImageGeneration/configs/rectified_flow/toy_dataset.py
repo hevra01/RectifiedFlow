@@ -28,7 +28,7 @@ def get_config():
   model = config.model
   model.input_dim = 4 # 2D + 2D because the time embedding is 2D and the input is 2D
   model.output_dim = 2
-  model.hidden_dim = 128
+  model.hidden_dims = (16,128,256,128,16)
   model.name = 'Simple2DNetwork'
   model.scale_by_sigma = False
   model.ema_rate = 0.999999

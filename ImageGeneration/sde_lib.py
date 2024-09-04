@@ -98,7 +98,6 @@ class RectifiedFlow():
       return x
 
     def get_z0(self, batch, train=True):
-      print("heree: ", batch.shape)
       n, d = batch.shape 
 
       if self.init_type == 'gaussian':

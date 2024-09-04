@@ -31,8 +31,8 @@ def plot_batch(batch):
     plt.close()
 
 
-#dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
+dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
 
-#loader = DataLoader(dataset, batch_size=100)
+loader = DataLoader(dataset, batch_size=30)
 
-#plot_batch(next(iter(loader)))
+plot_batch(list(iter(loader))[3])
