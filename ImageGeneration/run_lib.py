@@ -124,14 +124,13 @@ def train(config, workdir):
     sampling_fn = sampling.get_sampling_fn(config, sde, sampling_shape, inverse_scaler, sampling_eps)
 
   num_train_steps = config.training.n_iters
-
+  #num_train_steps = 100 # TODO: Remove this line
   # In case there are multiple hosts (e.g., TPU pods), only log to host 0
   logging.info("Starting training loop at step %d." % (initial_step,))
 
   for step in range(initial_step, num_train_steps + 1):
     batch = next(train_iter).to(config.device).float()
-   
-    #batch = scaler(batch)
+    
     # Execute one training step
     loss = train_step_fn(state, batch)
     if step % config.training.log_freq == 0:
@@ -159,7 +158,7 @@ def train(config, workdir):
       if config.training.snapshot_sampling:
         ema.store(score_model.parameters())
         ema.copy_to(score_model.parameters())
-        print(score_model)
+
         sample, n = sampling_fn(score_model)
 
         ema.restore(score_model.parameters())

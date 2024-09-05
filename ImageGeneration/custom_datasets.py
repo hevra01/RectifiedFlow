@@ -17,7 +17,22 @@ class Swissroll(Dataset):
     def __getitem__(self, i):
         # Return the i-th data point from the dataset
         return self.vals[i]
+    
 
+
+class Single_Point(Dataset):
+    """
+    This dataset is for sake of performing sanity check on the model.
+    To see whether the model is able to learn the mapping for a single point.
+    """
+    def __init__(self, N, point):
+        self.points = torch.stack([point] * N)
+
+    def __len__(self):
+        return len(self.points)
+
+    def __getitem__(self, i):
+        return self.points[i]
 
 
 def plot_batch(batch):
@@ -31,8 +46,14 @@ def plot_batch(batch):
     plt.close()
 
 
-dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
+#dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
 
-loader = DataLoader(dataset, batch_size=30)
+#loader = DataLoader(dataset, batch_size=30)
 
-plot_batch(list(iter(loader))[3])
+#plot_batch(list(iter(loader))[3])
+
+dataset = Single_Point(1000, torch.tensor([0.5, 0.5]))
+
+loader = DataLoader(dataset, batch_size=50)
+
+plot_batch(next(iter(loader)))

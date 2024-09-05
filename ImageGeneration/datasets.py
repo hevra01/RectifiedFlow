@@ -20,9 +20,10 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import os
+import torch
 from torch.utils.data import DataLoader
 
-from custom_datasets import Swissroll
+from custom_datasets import Single_Point, Swissroll
 
 def get_data_scaler(config):
   """Data normalizer. Assume data are always in [0, 1]."""
@@ -115,16 +116,31 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
     
 
   elif config.data.dataset == 'Swissroll':
-    dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
+    num_datapoints = 1000
+    dataset  = Swissroll(np.pi/2, 5*np.pi, num_datapoints)
 
     # split the dataset into training and evaluation
-    train_ds = dataset[:50]
-    eval_ds = dataset[50:]
+    train_ds = dataset[:num_datapoints//2]
+    eval_ds = dataset[num_datapoints//2:]
 
     # create dataloaders
     train_loader = DataLoader(train_ds, batch_size=2)
     eval_loader = DataLoader(eval_ds, batch_size=2)
-    
+
+    return train_loader, eval_loader, None
+  
+  elif config.data.dataset == 'Single_Point':
+    num_datapoints = 1000
+    dataset  = Single_Point(1000, torch.tensor([0.5, 0.5]))
+
+    # split the dataset into training and evaluation
+    train_ds = dataset[:num_datapoints//2]
+    eval_ds = dataset[num_datapoints//2:]
+
+    # create dataloaders
+    train_loader = DataLoader(train_ds, batch_size=2)
+    eval_loader = DataLoader(eval_ds, batch_size=2)
+
     return train_loader, eval_loader, None
 
   elif config.data.dataset == 'SVHN':

@@ -6,8 +6,8 @@ def get_default_configs():
   config = ml_collections.ConfigDict()
   # training
   config.training = training = ml_collections.ConfigDict()
-  config.training.batch_size = 10
-  training.n_iters = 1000
+  config.training.batch_size = 100
+  training.n_iters = 100000
   training.snapshot_freq = 50
   training.log_freq = 50
   training.eval_freq = 50
@@ -46,7 +46,7 @@ def get_default_configs():
 
   # data
   config.data = data = ml_collections.ConfigDict()
-  data.dataset = 'Swissroll'
+  data.dataset = 'Single_Point'
   data.image_size = 32
   data.random_flip = False
   data.centered = False
