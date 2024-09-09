@@ -49,16 +49,17 @@ def get_sampling_fn(config, sde, shape, inverse_scaler, eps):
   """
 
   sampler_name = config.sampling.method
+  save_intermediate = config.sampling.save_intermediate
   # Probability flow ODE sampling with black-box ODE solvers
   if sampler_name.lower() == 'rectified_flow':
-    sampling_fn = get_rectified_flow_sampler(sde=sde, shape=shape, inverse_scaler=inverse_scaler, device=config.device)
+    sampling_fn = get_rectified_flow_sampler(sde=sde, shape=shape, save_intermediate=save_intermediate, inverse_scaler=inverse_scaler, device=config.device)
   else:
     raise ValueError(f"Sampler name {sampler_name} unknown.")
 
   return sampling_fn
 
 
-def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
+def get_rectified_flow_sampler(sde, shape, save_intermediate, inverse_scaler, device='cuda'):
   """
   Get rectified flow sampler
 
@@ -121,7 +122,6 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
       if z is None:
         z0 = sde.get_z0(torch.zeros(shape, device=device), train=False).to(device)
         x = z0.detach().clone()
-        print("Initial Sample:", x)
       else:
         x = z
       
@@ -163,11 +163,23 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
       function evaluation.
       """
       nfe = solution.nfev
-      print("NFE:", nfe)
-      print("Solution:", solution.y)
-      print("last element:", torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32))
-      x = torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32)
 
+      if not save_intermediate:
+          x = torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32)
+      else:
+          # Save all intermediate steps
+          all_samples = []
+          for i in range(solution.y.shape[1]):
+              # Extract the sample at the i-th time step
+              intermediate_sample = torch.tensor(solution.y[:, i]).reshape(shape).to(device).type(torch.float32)
+              all_samples.append(intermediate_sample)
+
+          # Convert the list of intermediate steps to a tensor for saving
+          all_samples = torch.stack(all_samples)
+
+          # Save the tensor containing all steps (instead of just the last step)
+          x = all_samples
+    
       # since, I removed scalar() function from the code, I need to remove inverse_scaler from here as well
       #x = inverse_scaler(x)
       

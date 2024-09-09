@@ -120,12 +120,12 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
     dataset  = Swissroll(np.pi/2, 5*np.pi, num_datapoints)
 
     # split the dataset into training and evaluation
-    train_ds = dataset[:num_datapoints//2]
-    eval_ds = dataset[num_datapoints//2:]
+    train_ds = dataset[:num_datapoints]
+    eval_ds = dataset[:num_datapoints]
 
     # create dataloaders
-    train_loader = DataLoader(train_ds, batch_size=2)
-    eval_loader = DataLoader(eval_ds, batch_size=2)
+    train_loader = DataLoader(train_ds, batch_size=config.training.batch_size)
+    eval_loader = DataLoader(eval_ds, batch_size=config.training.batch_size)
 
     return train_loader, eval_loader, None
   
@@ -147,11 +147,10 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
   elif config.data.dataset == 'linear_line':
     num_datapoints = 1000
     dataset  = linear_line(1000, 0, 50)
-    print(dataset)
 
     # split the dataset into training and evaluation
-    train_ds = dataset[:num_datapoints//2]
-    eval_ds = dataset[num_datapoints//2:]
+    train_ds = dataset[:num_datapoints]
+    eval_ds = dataset[:num_datapoints]
 
     # create dataloaders
     train_loader = DataLoader(train_ds, batch_size=config.training.batch_size)

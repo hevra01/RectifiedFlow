@@ -6,8 +6,8 @@ def get_default_configs():
   config = ml_collections.ConfigDict()
   # training
   config.training = training = ml_collections.ConfigDict()
-  config.training.batch_size = 10
-  training.n_iters = 100000
+  config.training.batch_size = 1000
+  training.n_iters = 1000000
   training.snapshot_freq = 50
   training.log_freq = 50
   training.eval_freq = 50
@@ -24,13 +24,14 @@ def get_default_configs():
   sampling.n_steps_each = 1
   sampling.noise_removal = True
   sampling.probability_flow = False
+  sampling.save_intermediate = True
   sampling.snr = 0.16
   
   sampling.sigma_variance = 0.0 # NOTE: sigma variance for turning ODE to SDE
   sampling.init_noise_scale = 1.0
   sampling.use_ode_sampler = 'rk45'
   sampling.ode_tol = 1e-5
-  sampling.sample_N = 10
+  sampling.sample_N = 1000
 
   # evaluation
   config.eval = evaluate = ml_collections.ConfigDict()
@@ -46,7 +47,7 @@ def get_default_configs():
 
   # data
   config.data = data = ml_collections.ConfigDict()
-  data.dataset = 'Single_Point'
+  data.dataset = 'Swissroll'
   data.image_size = 32
   data.random_flip = False
   data.centered = False

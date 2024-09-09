@@ -81,7 +81,7 @@ def train(config, workdir):
   # Build data iterators
   train_ds, eval_ds, _ = datasets.get_dataset(config,
                                               uniform_dequantization=config.data.uniform_dequantization)
-  
+
   # Wrap the iterator with itertools.cycle to make it infinite
   train_iter = itertools.cycle(iter(train_ds))  
   eval_iter = itertools.cycle(iter(eval_ds))
@@ -124,7 +124,7 @@ def train(config, workdir):
     sampling_fn = sampling.get_sampling_fn(config, sde, sampling_shape, inverse_scaler, sampling_eps)
 
   num_train_steps = config.training.n_iters
-  #num_train_steps = 100 # TODO: Remove this line
+
   # In case there are multiple hosts (e.g., TPU pods), only log to host 0
   logging.info("Starting training loop at step %d." % (initial_step,))
 
@@ -133,7 +133,7 @@ def train(config, workdir):
     
     # Execute one training step
     loss = train_step_fn(state, batch)
-    
+
     if step % config.training.log_freq == 0:
       logging.info("step: %d, training_loss: %.5e" % (step, loss.item()))
       writer.add_scalar("training_loss", loss, step)
@@ -166,9 +166,17 @@ def train(config, workdir):
         this_sample_dir = os.path.join(sample_dir, "iter_{}".format(step))
         tf.io.gfile.makedirs(this_sample_dir)
         
-        with tf.io.gfile.GFile(
-            os.path.join(this_sample_dir, "sample.np"), "wb") as fout:
-          np.save(fout, sample.cpu())
+        # Save either the final sample or all intermediate samples
+        if not config.sampling.save_intermediate:
+          with tf.io.gfile.GFile(
+              os.path.join(this_sample_dir, "sample.np"), "wb") as fout:
+            np.save(fout, sample.cpu())
+        else:
+          # Save all steps
+          for step_idx in range(sample.shape[0]):
+              step_sample = sample[step_idx].cpu().numpy()
+              with tf.io.gfile.GFile(os.path.join(this_sample_dir, "sample_step_{}.np".format(step_idx)), "wb") as fout:
+                  np.save(fout, step_sample)
 
 def evaluate(config,
              workdir,
