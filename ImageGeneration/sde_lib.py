@@ -56,6 +56,8 @@ class RectifiedFlow():
         x = from_flattened_numpy(x, shape).to(device).type(torch.float32)
         vec_t = torch.ones(shape[0], device=x.device) * t
         drift = model_fn(x, vec_t*999)
+        print("drift:", drift)
+        exit()
         return to_flattened_numpy(drift)
 
       # Black-box ODE solver for the probability flow ODE
@@ -71,7 +73,7 @@ class RectifiedFlow():
                                      rtol=rtol, atol=atol, method=method)
       x = torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32)
       nfe = solution.nfev
-      #print('NFE:', nfe) 
+      print('NFE:', nfe) 
 
       return x
 
@@ -103,7 +105,14 @@ class RectifiedFlow():
       if self.init_type == 'gaussian':
           ### standard gaussian #+ 0.5
           cur_shape = (n, d)
-          return torch.randn(cur_shape)*self.noise_scale
+          #constant_1 = torch.tensor([7,8]).repeat(n//2, 1) * self.noise_scale
+          #constant_2 = torch.tensor([3,6]).repeat(n//2, 1) * self.noise_scale  
+          #new = torch.cat((constant_1, constant_2), dim=0)
+          #return new
+          single_point = torch.tensor([7,8]).repeat(n, 1) * self.noise_scale
+          return single_point
+          #init_distro = torch.randn(cur_shape)*self.noise_scale
+          #return init_distro # TODO: check this
       else:
           raise NotImplementedError("INITIALIZATION TYPE NOT IMPLEMENTED") 
       

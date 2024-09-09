@@ -23,7 +23,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 
-from custom_datasets import Single_Point, Swissroll
+from custom_datasets import Single_Point, Swissroll, linear_line
 
 def get_data_scaler(config):
   """Data normalizer. Assume data are always in [0, 1]."""
@@ -131,15 +131,31 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
   
   elif config.data.dataset == 'Single_Point':
     num_datapoints = 1000
-    dataset  = Single_Point(1000, torch.tensor([0.5, 0.5]))
+    dataset  = Single_Point(1000, torch.tensor([500, 700]))
 
     # split the dataset into training and evaluation
     train_ds = dataset[:num_datapoints//2]
     eval_ds = dataset[num_datapoints//2:]
 
     # create dataloaders
-    train_loader = DataLoader(train_ds, batch_size=2)
-    eval_loader = DataLoader(eval_ds, batch_size=2)
+    train_loader = DataLoader(train_ds, batch_size=config.training.batch_size)
+    eval_loader = DataLoader(eval_ds, batch_size=config.training.batch_size)
+
+    return train_loader, eval_loader, None
+  
+
+  elif config.data.dataset == 'linear_line':
+    num_datapoints = 1000
+    dataset  = linear_line(1000, 0, 50)
+    print(dataset)
+
+    # split the dataset into training and evaluation
+    train_ds = dataset[:num_datapoints//2]
+    eval_ds = dataset[num_datapoints//2:]
+
+    # create dataloaders
+    train_loader = DataLoader(train_ds, batch_size=config.training.batch_size)
+    eval_loader = DataLoader(eval_ds, batch_size=config.training.batch_size)
 
     return train_loader, eval_loader, None
 

@@ -147,7 +147,6 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
         x = from_flattened_numpy(x, shape).to(device).type(torch.float32)
         vec_t = torch.ones(shape[0], device=x.device) * t
         drift = model_fn(x, vec_t*999)
-
         return to_flattened_numpy(drift)
 
       # Black-box ODE solver for the probability flow ODE => solve initial value problems (IVPs)

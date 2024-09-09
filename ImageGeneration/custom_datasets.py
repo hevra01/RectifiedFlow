@@ -33,6 +33,19 @@ class Single_Point(Dataset):
 
     def __getitem__(self, i):
         return self.points[i]
+    
+class linear_line(Dataset):
+    def __init__(self, N, start, end):
+        # Generate a linearly spaced tensor t with N points between start and end
+        t = torch.linspace(start, end, N)
+        # Create a tensor of 2D points forming a linear line
+        self.points = torch.stack([t, t]).T
+
+    def __len__(self):
+        return len(self.points)
+
+    def __getitem__(self, i):
+        return self.points[i]
 
 
 def plot_batch(batch):
@@ -52,8 +65,8 @@ def plot_batch(batch):
 
 #plot_batch(list(iter(loader))[3])
 
-dataset = Single_Point(1000, torch.tensor([0.5, 0.5]))
+#dataset = linear_line(1000, 0, 50)
 
-loader = DataLoader(dataset, batch_size=50)
+#loader = DataLoader(dataset, batch_size=1000)
 
-plot_batch(next(iter(loader)))
+#plot_batch(next(iter(loader)))

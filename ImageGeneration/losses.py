@@ -99,13 +99,13 @@ def get_rectified_flow_loss_fn(sde, train, reduce_mean=True, eps=1e-3):
     else:
         ### standard rectified flow loss
         t = torch.rand(batch.shape[0], device=batch.device) * (sde.T - eps) + eps
-
-    
+           
     # Essentially, t_expand is a tensor where each element of t has been "expanded" into 
     # a 2D tensor of the same shape as the images in the batch, so the random time step t 
     # is now applied uniformly across all pixels and channels for each image.
     t_expand = t.view(-1, 1).repeat(1, batch.shape[1])
-
+    print('t_expand:', t_expand)
+    
     # This line performs a linear interpolation between the original image (batch) and the noise (z0).
     
     # The resulting perturbed_data is a weighted sum of the original image and the noise, 
@@ -114,7 +114,9 @@ def get_rectified_flow_loss_fn(sde, train, reduce_mean=True, eps=1e-3):
     # 0, t_expand will be close to 0, so perturbed_data will be closer to the noise z0.
     perturbed_data = t_expand * batch + (1.-t_expand) * z0
     target = batch - z0 
-    
+    print('perturbed_data:', perturbed_data)
+    print('target:', target)
+    exit() 
     model_fn = mutils.get_model_fn(model, train=train)
     # Given the perturbed data and the time step, the model tries to predict the
     # noise that was added to the image to generate the perturbed data.
