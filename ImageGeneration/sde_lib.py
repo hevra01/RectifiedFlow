@@ -109,7 +109,7 @@ class RectifiedFlow():
           #constant_2 = torch.tensor([3,6]).repeat(n//2, 1) * self.noise_scale  
           #new = torch.cat((constant_1, constant_2), dim=0)
           #return new
-          single_point = torch.tensor([7,8]).repeat(n, 1) * self.noise_scale
+          single_point = torch.tensor([3,9]).repeat(n, 1) * self.noise_scale
           return single_point
           #init_distro = torch.randn(cur_shape)*self.noise_scale
           #return init_distro # TODO: check this

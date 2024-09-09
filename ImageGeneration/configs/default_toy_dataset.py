@@ -7,7 +7,7 @@ def get_default_configs():
   # training
   config.training = training = ml_collections.ConfigDict()
   config.training.batch_size = 10
-  training.n_iters = 1000
+  training.n_iters = 100000
   training.snapshot_freq = 50
   training.log_freq = 50
   training.eval_freq = 50
@@ -30,7 +30,7 @@ def get_default_configs():
   sampling.init_noise_scale = 1.0
   sampling.use_ode_sampler = 'rk45'
   sampling.ode_tol = 1e-5
-  sampling.sample_N = 100
+  sampling.sample_N = 10
 
   # evaluation
   config.eval = evaluate = ml_collections.ConfigDict()

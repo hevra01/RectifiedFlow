@@ -121,6 +121,7 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
       if z is None:
         z0 = sde.get_z0(torch.zeros(shape, device=device), train=False).to(device)
         x = z0.detach().clone()
+        print("Initial Sample:", x)
       else:
         x = z
       
@@ -162,9 +163,13 @@ def get_rectified_flow_sampler(sde, shape, inverse_scaler, device='cuda'):
       function evaluation.
       """
       nfe = solution.nfev
+      print("NFE:", nfe)
+      print("Solution:", solution.y)
+      print("last element:", torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32))
       x = torch.tensor(solution.y[:, -1]).reshape(shape).to(device).type(torch.float32)
 
-      x = inverse_scaler(x)
+      # since, I removed scalar() function from the code, I need to remove inverse_scaler from here as well
+      #x = inverse_scaler(x)
       
       return x, nfe
   

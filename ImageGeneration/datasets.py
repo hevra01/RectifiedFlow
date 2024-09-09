@@ -131,7 +131,7 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
   
   elif config.data.dataset == 'Single_Point':
     num_datapoints = 1000
-    dataset  = Single_Point(1000, torch.tensor([500, 700]))
+    dataset  = Single_Point(1000, torch.tensor([12, 15]))
 
     # split the dataset into training and evaluation
     train_ds = dataset[:num_datapoints//2]

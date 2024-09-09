@@ -133,8 +133,7 @@ def train(config, workdir):
     
     # Execute one training step
     loss = train_step_fn(state, batch)
-    print("after one step")
-    exit()
+    
     if step % config.training.log_freq == 0:
       logging.info("step: %d, training_loss: %.5e" % (step, loss.item()))
       writer.add_scalar("training_loss", loss, step)
