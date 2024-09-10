@@ -1,3 +1,4 @@
+import math
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import torch
@@ -48,6 +49,24 @@ class linear_line(Dataset):
         return self.points[i]
 
 
+class FigureEight(Dataset):
+    def __init__(self, tmin, tmax, N):
+        # Generate a linearly spaced tensor t with N points between tmin and tmax
+        t = torch.linspace(tmin, tmax, N)
+        # Parametric equations for a figure-eight (lemniscate)
+        self.vals = torch.stack([torch.sin(t), torch.sin(2 * t)]).T  # 2D figure-eight
+
+    def __len__(self):
+        # Return the number of data points in the dataset
+        return len(self.vals)
+
+    def __getitem__(self, i):
+        # Return the i-th data point from the dataset
+        return self.vals[i]
+
+# Example usage:
+dataset = FigureEight(0, 2 * math.pi, 1000)  # Creates a figure-eight with 1000 points
+
 def plot_batch(batch):
     batch = batch.cpu().numpy()
     plt.scatter(batch[:,0], batch[:,1], marker='.')
@@ -59,9 +78,9 @@ def plot_batch(batch):
     plt.close()
 
 
-#dataset  = Swissroll(np.pi/2, 5*np.pi, 100)
+#dataset  = Swissroll(np.pi/2, 5*np.pi, 1000)
 
-#loader = DataLoader(dataset, batch_size=30)
+loader = DataLoader(dataset, batch_size=1000)
 
 #plot_batch(list(iter(loader))[3])
 
@@ -69,4 +88,4 @@ def plot_batch(batch):
 
 #loader = DataLoader(dataset, batch_size=1000)
 
-#plot_batch(next(iter(loader)))
+plot_batch(next(iter(loader)))

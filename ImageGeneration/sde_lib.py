@@ -1,7 +1,9 @@
 """Abstract SDE classes, Reverse SDE, and VE/VP SDEs."""
 import abc
+import math
 import torch
 import numpy as np
+from custom_datasets import FigureEight
 from models import utils as mutils
 
 
@@ -108,9 +110,11 @@ class RectifiedFlow():
           #return new
           #single_point = torch.tensor([3,9]).repeat(n, 1) * self.noise_scale
           #return single_point
-          
-          init_distro = torch.randn(cur_shape)*self.noise_scale
-          return init_distro # TODO: check this
+
+          dataset = FigureEight(0, 2 * math.pi, n)  # Creates a figure-eight with 1000 points
+          return dataset[:]
+          #init_distro = torch.randn(cur_shape)*self.noise_scale
+          #return init_distro # TODO: check this
       else:
           raise NotImplementedError("INITIALIZATION TYPE NOT IMPLEMENTED") 
       
